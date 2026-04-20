@@ -87,8 +87,11 @@ export default function AgendarPage() {
     const horariosBloqueados = new Set<string>()
     
     appointments.forEach((app) => {
-      const horaInicio = new Date(app.data_hora)
+      // CORREÇÃO DO FUSO HORÁRIO: Adicionar 3 horas (Brasil = UTC-3)
+      const horaUTC = new Date(app.data_hora)
+      const horaInicio = new Date(horaUTC.getTime() + (3 * 60 * 60 * 1000))
       const duracaoMin = app.services?.duracao_min || 60
+      
       const slotsOcupados = Math.ceil(duracaoMin / 60)
       
       for (let i = 0; i < slotsOcupados; i++) {
@@ -128,6 +131,7 @@ export default function AgendarPage() {
     setLoading(true)
 
     try {
+      // Salvar no banco em UTC (sem ajuste de fuso)
       const dataHora = `${selectedDate?.toISOString().split('T')[0]}T${selectedTime}:00`
       
       const { error } = await supabase
