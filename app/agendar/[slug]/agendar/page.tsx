@@ -1,7 +1,8 @@
- 'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import Link from 'next/link'
 import { supabase } from '../../../../lib/supabase'
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
@@ -66,63 +67,45 @@ export default function AgendarPage() {
   }
 
   const loadAvailableTimes = async (date: Date) => {
-  if (!profile?.id) return
-  
-  const dataFormatada = date.toISOString().split('T')[0]
-  
-  console.log('📅 Data selecionada:', dataFormatada)
-  console.log('👤 Profile ID:', profile.id)
-  
-  const { data, error } = await supabase
-    .from('appointments')
-    .select(`
-      data_hora,
-      services(duracao_min)
-    `)
-    .eq('profile_id', profile.id)
-    .gte('data_hora', `${dataFormatada}T00:00:00`)
-    .lte('data_hora', `${dataFormatada}T23:59:59`)
-    .neq('status', 'cancelado')
+    if (!profile?.id) return
+    
+    const dataFormatada = date.toISOString().split('T')[0]
+    
+    const { data } = await supabase
+      .from('appointments')
+      .select(`
+        data_hora,
+        services(duracao_min)
+      `)
+      .eq('profile_id', profile.id)
+      .gte('data_hora', `${dataFormatada}T00:00:00`)
+      .lte('data_hora', `${dataFormatada}T23:59:59`)
+      .neq('status', 'cancelado')
 
-  console.log('📦 Agendamentos encontrados:', data)
-  console.log('❌ Erro:', error)
-
-  const appointments = data as any[] || []
-  
-  const horariosBloqueados = new Set<string>()
-  
-  appointments.forEach((app) => {
-    // CORREÇÃO DO FUSO HORÁRIO: Adicionar 3 horas (Brasil = UTC-3)
-    const horaUTC = new Date(app.data_hora)
-    const horaInicio = new Date(horaUTC.getTime() + (3 * 60 * 60 * 1000)) // +3 horas
+    const appointments = data as any[] || []
     
-    const duracaoMin = app.services?.duracao_min || 60
+    const horariosBloqueados = new Set<string>()
     
-    console.log(`⏰ Agendamento UTC: ${horaUTC.toLocaleTimeString()}`)
-    console.log(`⏰ Agendamento BR: ${horaInicio.toLocaleTimeString()} - Duração: ${duracaoMin}min`)
-    
-    const slotsOcupados = Math.ceil(duracaoMin / 60)
-    
-    for (let i = 0; i < slotsOcupados; i++) {
-      const horarioBloqueado = new Date(horaInicio)
-      horarioBloqueado.setHours(horaInicio.getHours() + i)
+    appointments.forEach((app) => {
+      const horaInicio = new Date(app.data_hora)
+      const duracaoMin = app.services?.duracao_min || 60
+      const slotsOcupados = Math.ceil(duracaoMin / 60)
       
-      const hora = horarioBloqueado.getHours().toString().padStart(2, '0')
-      const minutos = horarioBloqueado.getMinutes().toString().padStart(2, '0')
-      const horarioFormatado = `${hora}:${minutos}`
-      
-      console.log(`  🚫 Bloqueando: ${horarioFormatado}`)
-      horariosBloqueados.add(horarioFormatado)
-    }
-  })
-  
-  console.log('🔒 Horários bloqueados:', Array.from(horariosBloqueados))
-  
-  const disponiveis = allTimeSlots.filter(h => !horariosBloqueados.has(h))
-  console.log('✅ Horários disponíveis:', disponiveis)
-  
-  setAvailableTimes(disponiveis)
-}
+      for (let i = 0; i < slotsOcupados; i++) {
+        const horarioBloqueado = new Date(horaInicio)
+        horarioBloqueado.setHours(horaInicio.getHours() + i)
+        
+        const hora = horarioBloqueado.getHours().toString().padStart(2, '0')
+        const minutos = horarioBloqueado.getMinutes().toString().padStart(2, '0')
+        const horarioFormatado = `${hora}:${minutos}`
+        
+        horariosBloqueados.add(horarioFormatado)
+      }
+    })
+    
+    const disponiveis = allTimeSlots.filter(h => !horariosBloqueados.has(h))
+    setAvailableTimes(disponiveis)
+  }
 
   const handleSelectService = (service: Service) => {
     setSelectedService(service)
@@ -196,15 +179,12 @@ export default function AgendarPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-100 via-rose-50 to-amber-100 relative overflow-hidden">
-      {/* Elementos decorativos */}
       <div className="absolute top-5 left-5 w-32 md:w-60 h-32 md:h-60 bg-rose-200 rounded-full mix-blend-multiply filter blur-2xl opacity-30"></div>
       <div className="absolute bottom-5 right-5 w-40 md:w-80 h-40 md:h-80 bg-amber-200 rounded-full mix-blend-multiply filter blur-2xl opacity-30"></div>
       
       <div className="relative z-10 max-w-3xl mx-auto px-3 md:px-4 py-6 md:py-8">
-        {/* Header com LOGO */}
         <div className="text-center mb-6 md:mb-8">
           
-          {/* LOGO */}
           <div className="w-36 h-36 md:w-44 md:h-44 mx-auto mb-4 md:mb-5">
             <img 
               src="/logo-aura.png" 
@@ -213,12 +193,10 @@ export default function AgendarPage() {
             />
           </div>
           
-          {/* NOME DO ESTÚDIO */}
           <h1 className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-rose-600 to-amber-600 bg-clip-text text-transparent px-2">
             {profile.nome_salao}
           </h1>
           
-          {/* Barra de progresso */}
           <div className="flex items-center justify-center gap-1 md:gap-2 mt-6 md:mt-7">
             {[1, 2, 3, 4, 5].map((s) => (
               <div key={s} className="flex items-center">
@@ -237,7 +215,6 @@ export default function AgendarPage() {
           </div>
         </div>
 
-        {/* Conteúdo */}
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-5 md:p-7 border border-white/50">
           {step === 1 && (
             <div>
@@ -412,17 +389,16 @@ export default function AgendarPage() {
               <p className="text-base text-gray-500 mt-7">
                 Enviamos uma confirmação para seu WhatsApp! 💚
               </p>
-              <a
+              <Link
                 href={`/agendar/${slug}`}
                 className="mt-7 inline-block bg-gradient-to-r from-rose-400 to-amber-400 text-white px-8 py-4 rounded-xl font-medium shadow-lg hover:shadow-xl transition text-lg"
               >
                 Voltar ao início
-              </a>
+              </Link>
             </div>
           )}
         </div>
 
-        {/* Informações Importantes */}
         <div className="mt-7 bg-rose-50/80 backdrop-blur rounded-2xl p-6 border border-rose-200 shadow-inner">
           <h3 className="font-semibold text-rose-700 mb-4 flex items-center gap-2 text-xl">
             <span>ℹ️</span> Informações Importantes
@@ -452,7 +428,6 @@ export default function AgendarPage() {
           <p className="text-base text-rose-400 mt-4 italic">✨ Sua saúde é nossa prioridade!</p>
         </div>
         
-        {/* Rodapé */}
         <div className="text-center mt-7">
           <p className="text-gray-400 text-sm">
             Aura Isa Studio • Especialista em extensão de cílios 👁️💖
