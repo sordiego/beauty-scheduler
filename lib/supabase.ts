@@ -1,24 +1,15 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseUrl = 'https://ijmhowrcrm.supabase.co'
+const supabaseAnonKey = 'sb_publishable_9Ef3fR5sHgN9Kc9zlMBDyA_U3gxzNBT'
 
-// Log para debug (vai aparecer nos logs da Vercel)
-console.log('🔧 Supabase URL definida:', supabaseUrl ? 'SIM' : 'NÃO')
-console.log('🔧 Supabase Key definida:', supabaseAnonKey ? 'SIM' : 'NÃO')
+console.log('🔧 Supabase URL:', supabaseUrl)
+console.log('🔧 Supabase Key:', supabaseAnonKey ? 'OK' : 'FALTANDO')
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('❌ ERRO CRÍTICO: Variáveis de ambiente do Supabase não encontradas!')
-}
-
-export const supabase = createClient(
-  supabaseUrl || '',
-  supabaseAnonKey || '',
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
   }
-)
+})
