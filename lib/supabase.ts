@@ -1,15 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://ijmhowrcrm.supabase.co'
-const supabaseAnonKey = 'sb_publishable_9Ef3fR5sHgN9Kc9zlMBDyA_U3gxzNBT'
+const supabaseUrl = 'https://mgjrjtzjexfrqnlkqiyl.supabase.co'
+const supabaseAnonKey = 'sb_publishable_NuopiwB5g5RrvsAfH2AzqA_XNXsQdg9'
 
-console.log('🔧 Supabase URL:', supabaseUrl)
-console.log('🔧 Supabase Key:', supabaseAnonKey ? 'OK' : 'FALTANDO')
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
-  }
-})
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
