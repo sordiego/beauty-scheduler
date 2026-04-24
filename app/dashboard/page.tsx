@@ -129,8 +129,8 @@ export default function DashboardPage() {
           <p className="text-white/80 text-sm mb-3">Compartilhe este link com suas clientes</p>
           <div className="bg-white/20 backdrop-blur rounded-xl p-3 flex items-center justify-between">
             <code className="text-white font-mono text-sm">
-              beauty.app/agendar/{profile?.slug}
-            </code>
+  https://beauty-scheduler-omega.vercel.app/agendar/{profile?.slug}
+</code>
             <button
               onClick={() => {
                 navigator.clipboard.writeText(`http://localhost:3000/agendar/${profile?.slug}`)
