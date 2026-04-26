@@ -14,28 +14,33 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    
-    if (!error) {
-      router.push('/dashboard')
-    } else {
+    const { data, error } = await supabase.auth.signInWithPassword({ 
+      email, 
+      password 
+    })
+
+    if (error) {
+      console.error('Erro no login:', error)
       alert('Email ou senha incorretos')
+      setLoading(false)
+      return
+    }
+
+    if (data?.user) {
+      router.push('/dashboard')
     }
     
     setLoading(false)
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-rose-100 via-pink-50 to-purple-100">
-      {/* Círculos decorativos de fundo */}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-100 via-pink-50 to-purple-100 relative overflow-hidden">
       <div className="absolute top-20 left-10 w-64 h-64 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
       <div className="absolute bottom-20 right-10 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-rose-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
       
-      {/* Card de Login */}
       <div className="relative z-10 w-96 mx-4">
         <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
-          {/* Logo */}
           <div className="text-center mb-8">
             <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg transform rotate-3 hover:rotate-0 transition">
               <span className="text-white text-3xl">💅</span>
