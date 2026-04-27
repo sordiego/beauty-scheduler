@@ -22,12 +22,12 @@ export default function DashboardPage() {
         
         setUser(user)
         
-        // Tentar buscar o perfil, mas não quebrar se falhar
+        // Buscar perfil - usando .maybeSingle() em vez de .single()
         const { data: profile } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
-          .single()
+          .maybeSingle()
         
         if (profile) {
           setProfile(profile)
@@ -87,7 +87,6 @@ export default function DashboardPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
-        {/* Card de Boas-vindas */}
         <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/50 mb-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">
             Olá, {profile?.nome_salao || 'Profissional'}! 💅
