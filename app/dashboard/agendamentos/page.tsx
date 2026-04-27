@@ -1,10 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '../../../lib/supabase'
 import { useRouter } from 'next/navigation'
 import { format, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  'https://iydjcgoysopqvujltnki.supabase.co',
+  'sb_publishable_iomyJl0Iky0TPAvnqOpp5w_GG6G4xU8'
+)
 
 type Appointment = {
   id: string
