@@ -41,20 +41,26 @@ export default function AgendarPage() {
     loadProfile()
   }, [])
 
-  const loadProfile = async () => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('slug', slug)
-      .maybeSingle()
-    
-    if (data) {
-      setProfile(data as Profile)
-      loadServices(data.id)
-    } else {
-      setLoadingProfile(false)
-    }
+ const loadProfile = async () => {
+  console.log('🔍 Buscando slug:', slug)
+  
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle()
+  
+  console.log('📦 Dados recebidos:', data)
+  console.log('❌ Erro:', error)
+  
+  if (data) {
+    setProfile(data as Profile)
+    loadServices(data.id)
+  } else {
+    console.log('⚠️ Perfil NÃO encontrado para slug:', slug)
+    setLoadingProfile(false)
   }
+}
 
   const loadServices = async (profileId: string) => {
     const { data } = await supabase
