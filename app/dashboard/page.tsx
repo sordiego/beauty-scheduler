@@ -12,40 +12,45 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+      // Pegar do localStorage (mesmo método do login)
+      const token = localStorage.getItem('supabase_token')
+      const userStr = localStorage.getItem('supabase_user')
       
-      if (!user) {
+      if (!token || !userStr) {
         router.push('/login')
         return
       }
       
-      setUser(user)
-      
-      // Buscar perfil
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle()
-      
-      if (profile) {
-        setProfile(profile)
-      }
+      try {
+        const user = JSON.parse(userStr)
+        setUser(user)
+        
+        // Buscar perfil com maybeSingle
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle()
+        
+        if (profile) {
+          setProfile(profile)
+          
+          // Buscar stats
+          const { data: appointments } = await supabase
+            .from('appointments')
+            .select('*, services(preco)')
+            .eq('profile_id', user.id)
 
-      // Buscar stats
-      if (profile) {
-        const { data: appointments } = await supabase
-          .from('appointments')
-          .select('*, services(preco)')
-          .eq('profile_id', user.id)
-
-        if (appointments) {
-          const total = appointments.reduce((acc: number, a: any) => acc + (a.services?.preco || 0), 0)
-          setStats({
-            agendamentos: appointments.length,
-            faturamento: total
-          })
+          if (appointments) {
+            const total = appointments.reduce((acc: number, a: any) => acc + (a.services?.preco || 0), 0)
+            setStats({
+              agendamentos: appointments.length,
+              faturamento: total
+            })
+          }
         }
+      } catch (err) {
+        console.error('Erro:', err)
       }
     }
     
@@ -53,6 +58,8 @@ export default function DashboardPage() {
   }, [])
 
   const handleLogout = async () => {
+    localStorage.removeItem('supabase_token')
+    localStorage.removeItem('supabase_user')
     await supabase.auth.signOut()
     router.push('/login')
   }
