@@ -68,6 +68,7 @@ export default function DashboardPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
+        {/* Card de Boas-vindas */}
         <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/50 mb-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">
             Bem-vinda! 💅
@@ -75,20 +76,25 @@ export default function DashboardPage() {
           <p className="text-gray-600">Email: {user?.email}</p>
         </div>
 
+        {/* Cards de funcionalidades */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/50">
+          <div 
+            onClick={() => router.push('/dashboard/agendamentos')}
+            className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/50 hover:shadow-xl transition cursor-pointer group"
+          >
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-pink-100 rounded-2xl flex items-center justify-center text-3xl">
+              <div className="w-14 h-14 bg-pink-100 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition">
                 📋
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800">Agendamentos</h3>
-                <p className="text-sm text-gray-500">Em breve</p>
+                <h3 className="font-semibold text-gray-800">Ver Agendamentos</h3>
+                <p className="text-sm text-gray-500">Gerencie todos os horários marcados</p>
               </div>
+              <span className="text-gray-400 group-hover:translate-x-1 transition">→</span>
             </div>
           </div>
           
-          <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/50">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/50 opacity-60">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center text-3xl">
                 📊
@@ -97,6 +103,7 @@ export default function DashboardPage() {
                 <h3 className="font-semibold text-gray-800">Relatórios</h3>
                 <p className="text-sm text-gray-500">Em breve</p>
               </div>
+              <span className="bg-gray-200 text-gray-500 text-xs px-2 py-1 rounded-full">Em breve</span>
             </div>
           </div>
         </div>
