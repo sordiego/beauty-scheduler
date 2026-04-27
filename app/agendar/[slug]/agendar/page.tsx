@@ -3,9 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { supabase } from '../../../../lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
+
+const supabase = createClient(
+  'https://iydjcgoysopqvujltnki.supabase.co',
+  'sb_publishable_iomyJl0Iky0TPAvnqOpp5w_GG6G4xU8'
+)
 
 type Service = {
   id: string
