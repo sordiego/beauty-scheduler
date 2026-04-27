@@ -3,12 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  'https://iydjcgoysopqvujltnki.supabase.co',
-  'sb_publishable_iomyJl0Iky0TPAvnqOpp5w_GG6G4xU8'
-)
+import { supabase } from '../../../../lib/supabase'
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
 
@@ -25,6 +20,7 @@ type Profile = {
   nome_salao: string
   slug: string
   telefone_whatsapp: string
+  observacoes?: string
 }
 
 export default function AgendarPage() {
@@ -46,26 +42,20 @@ export default function AgendarPage() {
     loadProfile()
   }, [])
 
- const loadProfile = async () => {
-  console.log('🔍 Buscando slug:', slug)
-  
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('slug', slug)
-    .maybeSingle()
-  
-  console.log('📦 Dados recebidos:', data)
-  console.log('❌ Erro:', error)
-  
-  if (data) {
-    setProfile(data as Profile)
-    loadServices(data.id)
-  } else {
-    console.log('⚠️ Perfil NÃO encontrado para slug:', slug)
-    setLoadingProfile(false)
+  const loadProfile = async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('slug', slug)
+      .maybeSingle()
+    
+    if (data) {
+      setProfile(data as Profile)
+      loadServices(data.id)
+    } else {
+      setLoadingProfile(false)
+    }
   }
-}
 
   const loadServices = async (profileId: string) => {
     const { data } = await supabase
@@ -98,7 +88,6 @@ export default function AgendarPage() {
     const horariosBloqueados = new Set<string>()
     
     appointments.forEach((app) => {
-      // CORREÇÃO DO FUSO HORÁRIO: Adicionar 3 horas (Brasil = UTC-3)
       const horaUTC = new Date(app.data_hora)
       const horaInicio = new Date(horaUTC.getTime() + (3 * 60 * 60 * 1000))
       const duracaoMin = app.services?.duracao_min || 60
@@ -142,7 +131,6 @@ export default function AgendarPage() {
     setLoading(true)
 
     try {
-      // Salvar no banco em UTC (sem ajuste de fuso)
       const dataHora = `${selectedDate?.toISOString().split('T')[0]}T${selectedTime}:00`
       
       const { error } = await supabase
@@ -200,10 +188,11 @@ export default function AgendarPage() {
       <div className="relative z-10 max-w-3xl mx-auto px-3 md:px-4 py-6 md:py-8">
         <div className="text-center mb-6 md:mb-8">
           
+          {/* LOGO DINÂMICA */}
           <div className="w-36 h-36 md:w-44 md:h-44 mx-auto mb-4 md:mb-5">
             <img 
-              src={`/${slug}.png`} 
-              alt="Aura Isa Studio" 
+              src={`/${slug}.png`}
+              alt={profile.nome_salao}
               className="w-full h-full object-cover rounded-3xl shadow-2xl border-4 border-white"
             />
           </div>
@@ -234,7 +223,7 @@ export default function AgendarPage() {
           {step === 1 && (
             <div>
               <h2 className="text-2xl font-semibold text-gray-800 mb-5 flex items-center gap-2">
-                <span className="text-3xl">👁️</span> Escolha o serviço
+                <span className="text-3xl">💄</span> Escolha o serviço
               </h2>
               <div className="space-y-4">
                 {services.length === 0 ? (
@@ -414,40 +403,27 @@ export default function AgendarPage() {
           )}
         </div>
 
-        <div className="mt-7 bg-rose-50/80 backdrop-blur rounded-2xl p-6 border border-rose-200 shadow-inner">
-          <h3 className="font-semibold text-rose-700 mb-4 flex items-center gap-2 text-xl">
-            <span>ℹ️</span> Informações Importantes
-          </h3>
-          <ul className="text-base text-gray-700 space-y-3">
-            <li className="flex items-start gap-3">
-              <span className="text-rose-500 text-xl mt-0.5">•</span>
-              <span><strong>Sinal de 30%</strong> para confirmar o agendamento (não reembolsável)</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-rose-500 text-xl mt-0.5">•</span>
-              <span><strong>Tolerância de atraso:</strong> 15 minutos. Após isso não será atendida.</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-rose-500 text-xl mt-0.5">•</span>
-              <span><strong>Duração:</strong> 1h30 a 2h (dependendo do olho da cliente)</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-rose-500 text-xl mt-0.5">•</span>
-              <span><strong>Vir sem maquiagem</strong> na região dos olhos</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="text-rose-500 text-xl mt-0.5">•</span>
-              <span>Em caso de alergia ou irritação, informar imediatamente</span>
-            </li>
-          </ul>
-          <p className="text-base text-rose-400 mt-4 italic">✨ Sua saúde é nossa prioridade!</p>
-        </div>
+        {/* Informações Importantes - DINÂMICAS */}
+        {profile?.observacoes && (
+          <div className="mt-7 bg-rose-50/80 backdrop-blur rounded-2xl p-6 border border-rose-200 shadow-inner">
+            <h3 className="font-semibold text-rose-700 mb-4 flex items-center gap-2 text-xl">
+              <span>ℹ️</span> Informações Importantes
+            </h3>
+            <ul className="text-base text-gray-700 space-y-3">
+              {profile.observacoes.split('•').filter(Boolean).map((item: string, i: number) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="text-rose-500 text-xl mt-0.5">•</span>
+                  <span>{item.trim()}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         
+        {/* Rodapé GENÉRICO */}
         <div className="text-center mt-7">
           <p className="text-gray-400 text-sm">
-            <p className="text-gray-400 text-sm">
-  Agendamento rápido e prático 💅✨
-</p>
+            Agendamento rápido e prático 💅✨
           </p>
           <p className="text-gray-300 text-xs mt-1">
             Beauty Scheduler • Agendamento rápido e seguro
