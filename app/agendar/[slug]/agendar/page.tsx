@@ -46,7 +46,7 @@ export default function AgendarPage() {
       .from('profiles')
       .select('*')
       .eq('slug', slug)
-      .single()
+      .maybeSingle()
     
     if (data) {
       setProfile(data as Profile)
