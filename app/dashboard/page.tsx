@@ -1,62 +1,43 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null)
-  const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (!user) {
-  router.push('/login')
-  return
-}
-        
-        setUser(user)
-        
-        // Buscar perfil - usando .maybeSingle() em vez de .single()
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle()
-        
-        if (profile) {
-          setProfile(profile)
-        } else {
-          console.log('Perfil não encontrado para:', user.email)
-        }
-      } catch (err) {
-        console.error('Erro ao carregar:', err)
-      } finally {
-        setLoading(false)
-      }
+    // Pegar o token salvo no localStorage
+    const token = localStorage.getItem('supabase_token')
+    const userStr = localStorage.getItem('supabase_user')
+    
+    if (!token || !userStr) {
+      router.push('/login')
+      return
     }
     
-    checkUser()
+    try {
+      const userData = JSON.parse(userStr)
+      setUser(userData)
+    } catch (err) {
+      console.error('Erro ao carregar usuário:', err)
+    }
+    
+    setLoading(false)
   }, [])
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
+  const handleLogout = () => {
+    localStorage.removeItem('supabase_token')
+    localStorage.removeItem('supabase_user')
     router.push('/login')
   }
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50 to-purple-50 flex items-center justify-center">
-        <div className="flex gap-2">
-          <div className="w-3 h-3 bg-pink-500 rounded-full animate-bounce"></div>
-          <div className="w-3 h-3 bg-pink-500 rounded-full animate-bounce delay-100"></div>
-          <div className="w-3 h-3 bg-pink-500 rounded-full animate-bounce delay-200"></div>
-        </div>
+        <p className="text-gray-500">Carregando...</p>
       </div>
     )
   }
@@ -71,7 +52,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                {profile?.nome_salao || 'Beauty Scheduler'}
+                Beauty Scheduler
               </h1>
               <p className="text-xs text-gray-500">{user?.email}</p>
             </div>
@@ -89,50 +70,25 @@ export default function DashboardPage() {
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/50 mb-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">
-            Olá, {profile?.nome_salao || 'Profissional'}! 💅
+            Bem-vinda! 💅
           </h2>
-          <p className="text-gray-600">Bem-vinda ao seu painel de controle.</p>
+          <p className="text-gray-600">Email: {user?.email}</p>
         </div>
 
-        {profile && (
-          <div className="bg-gradient-to-r from-pink-500 to-purple-500 rounded-2xl p-6 shadow-xl mb-6">
-            <h2 className="text-white text-lg font-semibold mb-2">🔗 Seu link de agendamento</h2>
-            <p className="text-white/80 text-sm mb-3">Compartilhe este link com suas clientes</p>
-            <div className="bg-white/20 backdrop-blur rounded-xl p-3 flex items-center justify-between">
-              <code className="text-white font-mono text-sm">
-                https://beauty-scheduler-omega.vercel.app/agendar/{profile.slug}/agendar
-              </code>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(`https://beauty-scheduler-omega.vercel.app/agendar/${profile.slug}/agendar`)
-                  alert('✅ Link copiado!')
-                }}
-                className="bg-white text-pink-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-pink-50 transition"
-              >
-                Copiar
-              </button>
-            </div>
-          </div>
-        )}
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div 
-            onClick={() => router.push('/dashboard/agendamentos')}
-            className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/50 hover:shadow-xl transition cursor-pointer group"
-          >
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/50">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-pink-100 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition">
+              <div className="w-14 h-14 bg-pink-100 rounded-2xl flex items-center justify-center text-3xl">
                 📋
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800">Ver Agendamentos</h3>
-                <p className="text-sm text-gray-500">Gerencie todos os horários marcados</p>
+                <h3 className="font-semibold text-gray-800">Agendamentos</h3>
+                <p className="text-sm text-gray-500">Em breve</p>
               </div>
-              <span className="text-gray-400 group-hover:translate-x-1 transition">→</span>
             </div>
           </div>
           
-          <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/50 opacity-60">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/50">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center text-3xl">
                 📊
@@ -141,7 +97,6 @@ export default function DashboardPage() {
                 <h3 className="font-semibold text-gray-800">Relatórios</h3>
                 <p className="text-sm text-gray-500">Em breve</p>
               </div>
-              <span className="bg-gray-200 text-gray-500 text-xs px-2 py-1 rounded-full">Em breve</span>
             </div>
           </div>
         </div>
