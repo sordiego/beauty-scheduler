@@ -202,7 +202,7 @@ export default function AgendarPage() {
           
           <div className="w-36 h-36 md:w-44 md:h-44 mx-auto mb-4 md:mb-5">
             <img 
-              src="/logo-aura.png" 
+              src={`/${slug}.png`} 
               alt="Aura Isa Studio" 
               className="w-full h-full object-cover rounded-3xl shadow-2xl border-4 border-white"
             />
@@ -445,7 +445,9 @@ export default function AgendarPage() {
         
         <div className="text-center mt-7">
           <p className="text-gray-400 text-sm">
-            Aura Isa Studio • Especialista em extensão de cílios 👁️💖
+            <p className="text-gray-400 text-sm">
+  Agendamento rápido e prático 💅✨
+</p>
           </p>
           <p className="text-gray-300 text-xs mt-1">
             Beauty Scheduler • Agendamento rápido e seguro
