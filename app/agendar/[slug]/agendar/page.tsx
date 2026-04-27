@@ -43,16 +43,22 @@ export default function AgendarPage() {
   }, [])
 
   const loadProfile = async () => {
-    const { data } = await supabase
+    console.log('🔍 Buscando slug:', slug)
+    
+    const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('slug', slug)
-      .maybeSingle()
+      .limit(1)
     
-    if (data) {
-      setProfile(data as Profile)
-      loadServices(data.id)
+    console.log('📦 Dados recebidos:', data)
+    console.log('❌ Erro:', error)
+    
+    if (data && data.length > 0) {
+      setProfile(data[0] as Profile)
+      loadServices(data[0].id)
     } else {
+      console.log('⚠️ Perfil NÃO encontrado para slug:', slug)
       setLoadingProfile(false)
     }
   }
@@ -188,7 +194,6 @@ export default function AgendarPage() {
       <div className="relative z-10 max-w-3xl mx-auto px-3 md:px-4 py-6 md:py-8">
         <div className="text-center mb-6 md:mb-8">
           
-          {/* LOGO DINÂMICA */}
           <div className="w-36 h-36 md:w-44 md:h-44 mx-auto mb-4 md:mb-5">
             <img 
               src={`/${slug}.png`}
@@ -241,9 +246,6 @@ export default function AgendarPage() {
                             {service.nome}
                           </h3>
                           <p className="text-base text-gray-500">{service.duracao_min} minutos</p>
-                          {service.descricao && (
-                            <p className="text-sm text-gray-400 mt-1">{service.descricao}</p>
-                          )}
                         </div>
                         <p className="text-2xl font-bold bg-gradient-to-r from-rose-600 to-amber-600 bg-clip-text text-transparent">
                           R$ {service.preco.toFixed(2)}
@@ -403,7 +405,6 @@ export default function AgendarPage() {
           )}
         </div>
 
-        {/* Informações Importantes - DINÂMICAS */}
         {profile?.observacoes && (
           <div className="mt-7 bg-rose-50/80 backdrop-blur rounded-2xl p-6 border border-rose-200 shadow-inner">
             <h3 className="font-semibold text-rose-700 mb-4 flex items-center gap-2 text-xl">
@@ -420,7 +421,6 @@ export default function AgendarPage() {
           </div>
         )}
         
-        {/* Rodapé GENÉRICO */}
         <div className="text-center mt-7">
           <p className="text-gray-400 text-sm">
             Agendamento rápido e prático 💅✨
