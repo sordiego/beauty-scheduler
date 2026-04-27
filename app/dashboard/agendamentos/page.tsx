@@ -29,13 +29,15 @@ export default function AgendamentosPage() {
   }, [])
 
   const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const token = localStorage.getItem('supabase_token')
+    const userStr = localStorage.getItem('supabase_user')
     
-    if (!user) {
+    if (!token || !userStr) {
       router.push('/login')
       return
     }
     
+    const user = JSON.parse(userStr)
     loadAppointments(user.id)
   }
 
@@ -89,24 +91,6 @@ export default function AgendamentosPage() {
       alert('✅ Agendamento cancelado com sucesso!')
     } else {
       alert('❌ Erro ao cancelar agendamento. Tente novamente.')
-    }
-  }
-
-  const deletePermanently = async (id: string, nome: string) => {
-    if (!confirm(`⚠️ ATENÇÃO! Isso vai EXCLUIR PERMANENTEMENTE o agendamento de ${nome}.\n\nEsta ação NÃO pode ser desfeita!`)) {
-      return
-    }
-
-    const { error } = await supabase
-      .from('appointments')
-      .delete()
-      .eq('id', id)
-
-    if (!error) {
-      setAppointments(appointments.filter(a => a.id !== id))
-      alert('✅ Agendamento excluído permanentemente!')
-    } else {
-      alert('❌ Erro ao excluir agendamento. Tente novamente.')
     }
   }
 
@@ -295,7 +279,6 @@ export default function AgendamentosPage() {
           )}
         </div>
         
-        {/* Rodapé */}
         <p className="text-center text-gray-400 text-xs mt-6">
           Beauty Scheduler • Gestão de agendamentos
         </p>
